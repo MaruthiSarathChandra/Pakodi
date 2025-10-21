@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Pakodi Basket</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        /* General styling */
+        body { margin: 0; font-family: Arial, sans-serif; }
+        h1 { font-family: Roboto, sans-serif; text-align: center; margin: 20px 0; }
+
+        /* Header styling */
+        .banner {
+          background-color: #DAA520;
+          padding: 10px 0;
+          position: relative;
+          z-index: 10;
+        }
+        .banner ul {
+          margin: 0;
+          list-style: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+        }
+        .banner ul li {
+          position: relative;
+          padding: 15px 20px;
+          color: white;
+          cursor: pointer;
+        }
+        #brand-name { font-weight: bold; font-size: 25px; cursor: default; }
+        #search-bar { margin-left: 20px; }
+        #search-bar input {
+          font-size: 16px;
+          width: 450px;
+          padding: 5px;
+          border: 0;
+          outline: none;
+          border-radius: 2px;
+          box-sizing: border-box;
+          font-family: "Roboto", sans-serif;
+          cursor: default;
+        }
+        .banner ul li:hover:not(#brand-name):not(#search-bar):not(.no-hover) { background-color: #DAA100; }
+        .banner ul li ul {
+          display: none;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          background-color: #DAA520;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+          min-width: 143px;
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          z-index: 20;
+        }
+        .banner ul li ul li {
+          padding: 10px 15px;
+          color: white;
+          cursor: pointer;
+          border-bottom: 1px dotted #fff;
+        }
+        .banner ul li ul li:hover { color: #444; }
+        .banner ul li:hover ul { display: block; }
+
+        /* Product container */
+        .product-container {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 20px;
+          justify-content: center;
+          padding: 20px;
+        }
+        .product-card {
+          background-color: white;
+          border: 1px solid #ccc;
+          border-radius: 10px;
+          width: 250px;
+          padding: 10px;
+          box-sizing: border-box;
+          text-align: center;
+        }
+        .product-card:hover {box-shadow: 0 4px 8px rgba(0,0,0,0.1);}
+        .image {
+          width: 180px;
+          height: 180px;
+          border-radius: 100px;
+          padding: 9px;
+          background: conic-gradient(from 220deg, orange 280deg, black 180deg, black 360deg);
+          margin: auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          box-sizing: border-box;
+        }
+        .image img {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          object-fit: cover;
+          background: white;
+        }
+        .rating { background-color: #e0f7fa; display: inline-block; padding: 5px 10px; border-radius: 20px; font-weight: bold; margin: 10px 0; }
+
+        .product-description-box {
+          background: #f5f5f5;
+          padding: 10px;
+          border-radius: 6px;
+          margin-top: 10px;
+        }
+        .product-name { font-weight: bold; font-size: 18px; margin: 5px 0; }
+        .price { font-weight: bold; font-size: 16px; color: #333; }
+        .original-price { text-decoration: line-through; color: gray; margin-left: 10px; }
+        .discount { color: orange; margin-left: 10px; }
+
+        .restaurant-name { color: gray; font-size: 14px; margin-bottom: 10px; }
+        .product-description { font-size: 14px; margin-bottom: 5px; }
+        .product-description span { color: green; font-family: serif; }
+
+        .product-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-top: 8px;
+        }
+        .product-actions label { font-size: 14px; color: #333; }
+        input[type=number] { width: 50px; }
+        button {
+          background: #DAA520;
+          color: white;
+          border: none;
+          padding: 8px 12px;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        button:hover { background: #DAA100; }
+        hr { margin: 20px auto; width: 90%; border-bottom: 1px solid #000; }
+    </style>
+</head>
+
+<body>
+<header class="banner">
+    <ul>
+        <li id="brand-name" class="no-hover">Pakodi</li>
+        <li id="search-bar" class="no-hover"><input type="text" placeholder="Search Pakodi"/></li>
+        <li><i class="fa fa-user-circle-o"></i> My Account
+            <ul>
+                <li>My Details</li>
+                <li>My Orders</li>
+                <li>LogOut</li>
+            </ul>
+        </li>
+        <li id="basketBtn" class="no-hover"><i class="fa fa-shopping-cart"></i> Basket</li>
+
+    </ul>
+</header>
+
+<main>
+    <h1>Pakodi Basket</h1><hr/>
+    <div id="past-orders" class="product-container"></div>
+
+</main>
+
+<script>
+    const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    async function fetchBasketItems() {
+      try {
+        const res = await fetch('http://localhost:8080/pakodi/api/basket', { credentials: 'include' });
+        if (!res.ok) throw new Error('Failed to fetch orders');
+        return await res.json();
+      } catch (e) {
+        console.error('Error fetching orders:', e);
+        return [];
+      }
+    }
+
+    const pastOrdersContainer = document.getElementById('past-orders');
+    fetchBasketItems().then(data => {
+      if (data.length === 0) {
+        pastOrdersContainer.innerHTML = 'No past orders found.';
+        return;
+      }
+      data.forEach(order => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div class="image"><img src="${order.image}" alt="${order.itemName}"/></div>
+
+          <div class="product-description-box">
+            <div class="rating">4.4 ★ | 33</div>
+
+            <div class="product-name">${order.menuId.itemName}</div>
+            <div class="restaurant-name">${order.restaurant.restaurantName}</div>
+            <div class="price">Rs. ${Math.round(order.price * 100)}<span class="original-price">Rs. ${Math.round(order.price * 250)}</span><span class="discount">(60% OFF)</span></div>
+            <div class="product-description">Status: <span>${capitalize(order.menuId.itemStatus)}</span> | Type: <span>${capitalize(order.menuId.itemType)}</span></div>
+            <div class="product-description">Ingredients: ${order.menuId.ingredients}</div>
+            <div class="product-actions">
+              <label for="quantity-${order.id}">Qty:</label>
+              <input type="number" id="quantity-${order.menuId.id}" min="1" value="1" />
+              <button onclick="addToCart(${order.restaurant.id}, ${order.menuId.id}, ${order.menuId.price})">Add to Cart</button>
+            </div>
+          </div>
+        `;
+        pastOrdersContainer.appendChild(card);
+      });
+    });
+
+
+    async function addToCart(restaurantId, itemId, price) {
+      const quantity = parseInt(document.getElementById(`quantity-${itemId}`).value) || 1;
+      const cartData = {
+        quantity: quantity,
+        restaurant: { id: restaurantId },
+        menuId: { id: itemId, price: price }
+      };
+      try {
+        const res = await fetch('http://localhost:8080/pakodi/api/add-to-cartt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cartData)
+        });
+        if (res.ok) {
+          alert('Item added to cart!');
+        } else {
+          alert('Failed to add to cart.');
+        }
+      } catch (e) {
+        console.error('Error adding to cart:', e);
+        alert('Error adding to cart.');
+      }
+    }
+
+
+
+</script>
+</body>
+</html>

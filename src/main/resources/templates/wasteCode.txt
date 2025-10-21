@@ -1,0 +1,54 @@
+<!---<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id = "tag" ><spam th:text = "${username}"></spam>welcome</div>
+<div id = "past-orders"></div>
+
+
+
+
+<script>
+
+    async function fetchOrders() {
+        try {
+
+        const response = await fetch('http://localhost:8080/pakodi/past-orders/n.maruthi1302@gmail.com');
+        const data = await response.json();
+        return data;
+        } catch (error){
+            console.error(error);
+        }
+
+    }
+
+    const pastorders = document.getElementById("past-orders");
+
+    fetchOrders().then(data => {
+        if (data && Array.isArray(data)) {
+        data.forEach(order => {
+            const item = document.createElement("p");
+            item.innerHTML = `
+                <strong>Item Name:</strong> ${order.itemName} <br>
+                <strong>Price:</strong> $${order.price} <br>
+                <strong>Restaurant:</strong> ${order.restaurantId.restarantName} <br>
+                <strong>Status:</strong> ${order.itemStatus} <br>
+                <strong>Type:</strong> ${order.itemType} <br>
+                <strong>Ingredients:</strong> ${order.ingredients} <br><br>
+            `;
+            pastorders.appendChild(item);
+        });
+    } else {
+        pastorders.innerHTML = "No past orders found.";
+    }
+    });
+
+
+
+</script>
+</body>
+</html>
+--->
